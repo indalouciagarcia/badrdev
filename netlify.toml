@@ -1,0 +1,22 @@
+# Configuration de déploiement Netlify pour Single Page Application (SPA) React / Vite
+
+[build]
+  # Dossier contenant le code compilé prêt pour la production
+  publish = "dist"
+  
+  # Commande de build pour compiler l'application
+  command = "npm run build"
+
+# Règle de redirection indispensable pour les routeurs SPA (React Router)
+# Redirige toutes les requêtes URL vers index.html pour laisser React gérer le routage dynamique
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+# Configuration de cache et d'en-têtes HTTP pour de meilleures performances
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

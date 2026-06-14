@@ -1,0 +1,48 @@
+/* Typographie proportionnelle pour la page Services */
+
+.section-head .subtitle {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.section-head .title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-head .description {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+.service-card-v2 h2.service-card-num {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.service-card-v2 .service-para {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+/* Formulaire de contact */
+.contact-form .input-field {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 400;
+}
+
+.tmp-btn .btn-text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+/* Amélioration générale de la lisibilité */
+.latest-service-area,
+.get-in-touch-area {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
