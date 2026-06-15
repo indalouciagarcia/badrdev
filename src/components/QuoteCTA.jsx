@@ -1,115 +1,135 @@
-import { useNavigate } from 'react-router-dom';
-import { FileText, ArrowRight } from 'lucide-react';
+import { FileText, ArrowRight, Sparkles, Zap, ShieldCheck } from 'lucide-react';
 
 export default function QuoteCTA() {
-  const navigate = useNavigate();
-
   const handleRequestQuote = (e) => {
     e.preventDefault();
-    navigate('/devis');
+    // Déclenche l'événement global pour ouvrir le pop-up modal de devis
+    const event = new CustomEvent('openQuoteModal');
+    window.dispatchEvent(event);
   };
 
   return (
     <div style={{
-      background: '#1b1b1c',
+      background: 'white',
       padding: '3rem 2rem',
       borderRadius: '24px',
       textAlign: 'center',
-      border: '1px solid rgba(255,255,255,0.08)',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+      border: '1px solid rgb(226, 232, 240)',
+      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 10px 25px -5px',
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Décor cercle en fond */}
+      {/* Icône Sparkles */}
       <div style={{
-        position: 'absolute', top: '-40px', right: '-40px',
-        width: '150px', height: '150px',
-        background: 'rgba(255,1,79,0.06)', borderRadius: '50%',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '-30px', left: '-30px',
-        width: '100px', height: '100px',
-        background: 'rgba(255,1,79,0.04)', borderRadius: '50%',
-        pointerEvents: 'none',
-      }} />
-
-      {/* Icône */}
-      <div style={{
-        width: '68px',
-        height: '68px',
-        background: 'rgba(255,1,79,0.12)',
+        width: '64px',
+        height: '64px',
+        background: 'rgba(255, 1, 79, 0.08)',
         color: '#FF014F',
         borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         margin: '0 auto 1.5rem',
-        border: '2px solid rgba(255,1,79,0.2)',
-        position: 'relative',
-        zIndex: 1,
+        boxShadow: 'rgba(255, 1, 79, 0.1) 0px 0px 20px',
       }}>
-        <FileText size={30} />
+        <Sparkles size={32} />
       </div>
 
       {/* Titre */}
       <h3 style={{
-        fontSize: '1.6rem',
-        fontWeight: '800',
+        fontSize: '2.15rem',
+        fontWeight: '900',
+        color: 'rgb(30, 41, 59)',
         marginBottom: '1rem',
-        color: '#ffffff',
-        lineHeight: '1.3',
-        position: 'relative',
-        zIndex: 1,
+        lineHeight: '1.2',
       }}>
-        Prêt à démarrer votre projet ?
+        Prêt à lancer votre projet ?
       </h3>
 
       {/* Description */}
       <p style={{
-        color: '#9f9f9f',
-        marginBottom: '2rem',
-        lineHeight: '1.7',
-        fontSize: '1rem',
-        position: 'relative',
-        zIndex: 1,
+        color: 'rgb(100, 116, 139)',
+        fontSize: '1.2rem',
+        lineHeight: '1.6',
+        marginBottom: '2.5rem',
       }}>
-        Obtenez une estimation détaillée, structurée et rapide pour votre développement Web, Mobile ou Consulting.
+        Estimez le coût de votre développement web, mobile ou consulting technique en moins de 2 minutes.
       </p>
+
+      {/* Liste des bénéfices */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.25rem',
+        textAlign: 'left',
+        background: 'rgb(248, 250, 252)',
+        padding: '1.5rem',
+        borderRadius: '20px',
+        marginBottom: '2.5rem',
+        border: '1px solid rgb(226, 232, 240)',
+      }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <Zap size={22} color="#FF014F" style={{ marginTop: '4px', flexShrink: 0 }} />
+          <div>
+            <strong style={{ color: 'rgb(51, 65, 85)', fontSize: '1.15rem', display: 'block', marginBottom: '0.25rem' }}>
+              Estimation rapide & gratuite
+            </strong>
+            <p style={{ color: 'rgb(100, 116, 139)', fontSize: '1.02rem', margin: 0, lineHeight: '1.5' }}>
+              Réponse et étude personnalisée sous 48 heures.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <FileText size={22} color="#FF014F" style={{ marginTop: '4px', flexShrink: 0 }} />
+          <div>
+            <strong style={{ color: 'rgb(51, 65, 85)', fontSize: '1.15rem', display: 'block', marginBottom: '0.25rem' }}>
+              Génération de devis structuré
+            </strong>
+            <p style={{ color: 'rgb(100, 116, 139)', fontSize: '1.02rem', margin: 0, lineHeight: '1.5' }}>
+              Recevez une estimation formelle avec référence unique.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <ShieldCheck size={22} color="#FF014F" style={{ marginTop: '4px', flexShrink: 0 }} />
+          <div>
+            <strong style={{ color: 'rgb(51, 65, 85)', fontSize: '1.15rem', display: 'block', marginBottom: '0.25rem' }}>
+              100% Confidentiel
+            </strong>
+            <p style={{ color: 'rgb(100, 116, 139)', fontSize: '1.02rem', margin: 0, lineHeight: '1.5' }}>
+              Vos données et idées de projets sont entièrement protégées.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Bouton CTA */}
       <button
         onClick={handleRequestQuote}
+        className="quote-btn-submit"
         style={{
-          background: '#FF014F',
-          color: 'white',
-          border: 'none',
-          padding: '1rem 2rem',
-          borderRadius: '50px',
-          fontSize: '1.1rem',
-          fontWeight: '700',
-          cursor: 'pointer',
-          display: 'inline-flex',
+          padding: '1.15rem 2.5rem',
+          fontSize: '1.25rem',
+          display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
           gap: '0.75rem',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 8px 25px rgba(255,1,79,0.4)',
-          position: 'relative',
-          zIndex: 1,
-        }}
-        onMouseOver={e => {
-          e.currentTarget.style.background = '#cc003d';
-          e.currentTarget.style.transform = 'translateY(-3px)';
-          e.currentTarget.style.boxShadow = '0 12px 30px rgba(255,1,79,0.5)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.background = '#FF014F';
-          e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(255,1,79,0.4)';
+          width: '100%',
+          margin: '0px auto',
+          borderRadius: '14px',
+          border: 'none',
+          color: 'white',
+          background: 'linear-gradient(135deg, #FF014F 0%, #FF494A 100%)',
+          cursor: 'pointer',
+          fontWeight: '600',
+          boxShadow: 'rgba(255, 1, 79, 0.25) 0px 8px 20px',
+          transition: 'all 0.2s ease',
         }}
       >
-        Demander un devis
-        <ArrowRight size={20} />
+        Demander mon devis
+        <ArrowRight size={24} />
       </button>
     </div>
   );

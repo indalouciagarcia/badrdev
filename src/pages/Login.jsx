@@ -186,7 +186,12 @@ export default function Login({ onLoginSuccess }) {
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
-                style={{ ...s.input, paddingRight: '2.5rem' }}
+                style={{ 
+                  ...s.input, 
+                  paddingRight: '2.5rem',
+                  fontFamily: showPassword ? 'inherit' : 'monospace',
+                  letterSpacing: showPassword ? 'normal' : '4px'
+                }}
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}

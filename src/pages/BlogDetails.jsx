@@ -131,7 +131,7 @@ function RecentPostsSlider({ currentId }) {
           </p>
         )}
         <button
-          onClick={() => navigate(`/blog/${post.id}`)}
+          onClick={() => navigate(`/blog-details/${post.id}`)}
           style={{
             background: '#FF014F', color: 'white', border: 'none',
             borderRadius: '50px', padding: '0.6rem 1.5rem',

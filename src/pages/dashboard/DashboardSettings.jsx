@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../config/supabase'
 import {
   BarChart3, CheckCircle, AlertCircle, Save, RefreshCw,
-  ExternalLink, Info, Globe, Search, Eye, EyeOff
+  ExternalLink, Info, Globe, Search, Eye, EyeOff, Upload, Image
 } from 'lucide-react'
 
-const SETTINGS_KEYS = ['ga_measurement_id', 'ga_enabled', 'site_title', 'meta_description']
+const SETTINGS_KEYS = [
+  'ga_measurement_id', 'ga_enabled', 'site_title', 'meta_description',
+  'header_logo_text', 'header_logo_dark', 'header_logo_white', 'footer_logo'
+]
 
 export default function DashboardSettings() {
   const [settings, setSettings] = useState({})
@@ -14,12 +17,57 @@ export default function DashboardSettings() {
   const [toast, setToast] = useState(null)
   const [showGaId, setShowGaId] = useState(false)
   const [gaPreview, setGaPreview] = useState(false)
+  const [uploading, setUploading] = useState({})
 
   useEffect(() => { fetchSettings() }, [])
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3500)
+  }
+
+  const handleLogoUpload = async (e, settingKey) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(prev => ({ ...prev, [settingKey]: true }))
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `logo_${settingKey}_${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = fileName
+
+      let activeBucket = 'portfolio'
+      let uploadRes = await supabase.storage
+        .from('portfolio')
+        .upload(filePath, file)
+
+      if (uploadRes.error) {
+        activeBucket = 'uploads'
+        uploadRes = await supabase.storage
+          .from('uploads')
+          .upload(filePath, file)
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'profile'
+        uploadRes = await supabase.storage
+          .from('profile')
+          .upload(filePath, file)
+      }
+
+      if (uploadRes.error) throw uploadRes.error
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(activeBucket)
+        .getPublicUrl(filePath)
+
+      updateSetting(settingKey, publicUrl)
+      showToast('Logo importé avec succès !')
+    } catch (err) {
+      showToast("Erreur lors de l'import : " + err.message, 'error')
+    } finally {
+      setUploading(prev => ({ ...prev, [settingKey]: false }))
+    }
   }
 
   const fetchSettings = async () => {
@@ -310,6 +358,103 @@ export default function DashboardSettings() {
               placeholder="Description courte de votre portfolio (160 caractères max)"
             />
             <p style={s.helpText}>{(settings.meta_description || '').length}/160 caractères recommandés</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section Logos du Site ── */}
+      <div style={s.section}>
+        <div style={s.sectionHead}>
+          <div style={s.sectionIcon('#0d9488')}>
+            <Image size={20} />
+          </div>
+          <div>
+            <h3 style={s.sectionTitle}>Logos du site</h3>
+            <p style={s.sectionDesc}>Gérez le texte et les images des logos du header et du footer.</p>
+          </div>
+        </div>
+        <div style={s.body}>
+          {/* Logo Texte */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={s.label}>Texte du logo (Header)</label>
+            <input
+              style={s.input}
+              value={settings.header_logo_text || ''}
+              onChange={e => updateSetting('header_logo_text', e.target.value)}
+              placeholder="Ex: Badr Belabbes"
+            />
+            <p style={s.helpText}>Utilisé comme texte alternatif dans le header si aucun logo image n'est défini.</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+            {/* Logo Dark */}
+            <div>
+              <label style={s.label}>Logo sombre (Header collant)</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {settings.header_logo_dark && (
+                  <div style={{ padding: '0.5rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'center' }}>
+                    <img src={settings.header_logo_dark} alt="Logo Dark Preview" style={{ maxHeight: '45px', objectFit: 'contain' }} />
+                  </div>
+                )}
+                <input
+                  style={s.input}
+                  value={settings.header_logo_dark || ''}
+                  onChange={e => updateSetting('header_logo_dark', e.target.value)}
+                  placeholder="URL du logo sombre"
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '600', justifyContent: 'center' }}>
+                  {uploading.header_logo_dark ? <RefreshCw size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={14} />}
+                  <span>{uploading.header_logo_dark ? 'Téléchargement...' : 'Téléverser'}</span>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleLogoUpload(e, 'header_logo_dark')} disabled={uploading.header_logo_dark} />
+                </label>
+              </div>
+            </div>
+
+            {/* Logo White */}
+            <div>
+              <label style={s.label}>Logo blanc (Header transparent)</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {settings.header_logo_white && (
+                  <div style={{ padding: '0.5rem', background: '#0f172a', borderRadius: '8px', display: 'flex', justifyContent: 'center' }}>
+                    <img src={settings.header_logo_white} alt="Logo White Preview" style={{ maxHeight: '45px', objectFit: 'contain' }} />
+                  </div>
+                )}
+                <input
+                  style={s.input}
+                  value={settings.header_logo_white || ''}
+                  onChange={e => updateSetting('header_logo_white', e.target.value)}
+                  placeholder="URL du logo blanc"
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '600', justifyContent: 'center' }}>
+                  {uploading.header_logo_white ? <RefreshCw size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={14} />}
+                  <span>{uploading.header_logo_white ? 'Téléchargement...' : 'Téléverser'}</span>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleLogoUpload(e, 'header_logo_white')} disabled={uploading.header_logo_white} />
+                </label>
+              </div>
+            </div>
+
+            {/* Logo Footer */}
+            <div>
+              <label style={s.label}>Logo du footer</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {settings.footer_logo && (
+                  <div style={{ padding: '0.5rem', background: '#0f172a', borderRadius: '8px', display: 'flex', justifyContent: 'center' }}>
+                    <img src={settings.footer_logo} alt="Logo Footer Preview" style={{ maxHeight: '45px', objectFit: 'contain' }} />
+                  </div>
+                )}
+                <input
+                  style={s.input}
+                  value={settings.footer_logo || ''}
+                  onChange={e => updateSetting('footer_logo', e.target.value)}
+                  placeholder="URL du logo du footer"
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '600', justifyContent: 'center' }}>
+                  {uploading.footer_logo ? <RefreshCw size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={14} />}
+                  <span>{uploading.footer_logo ? 'Téléchargement...' : 'Téléverser'}</span>
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleLogoUpload(e, 'footer_logo')} disabled={uploading.footer_logo} />
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>

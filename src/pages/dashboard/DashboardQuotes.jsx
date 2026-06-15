@@ -219,8 +219,41 @@ export default function DashboardQuotes() {
                       </div>
                     </div>
                     <div>
-                      <strong style={{ display: 'block', fontSize: '12px', color: '#64748b', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Détails / Message</strong>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#334155', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{req.message}</p>
+                      <strong style={{ display: 'block', fontSize: '12px', color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Détails & Qualification du Projet</strong>
+                      {req.message && req.message.includes('--- IDENTITÉ DU CLIENT ---') ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', background: '#ffffff', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13.5px' }}>
+                          {req.message.split('\n\n').map((section, sidx) => {
+                            const lines = section.trim().split('\n');
+                            const sectionTitle = lines[0].replace(/---/g, '').trim();
+                            const sectionItems = lines.slice(1);
+                            
+                            if (!sectionTitle) return null;
+                            return (
+                              <div key={sidx} style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '6px', border: '1px solid #f1f5f9' }}>
+                                <strong style={{ color: '#FF014F', display: 'block', fontSize: '11px', textTransform: 'uppercase', marginBottom: '0.4rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.2rem' }}>
+                                  {sectionTitle}
+                                </strong>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                  {sectionItems.map((li, lidx) => {
+                                    const parts = li.split(':');
+                                    if (parts.length >= 2) {
+                                      return (
+                                        <div key={lidx}>
+                                          <span style={{ color: '#64748b', fontWeight: '500' }}>{parts[0].trim()} : </span>
+                                          <span style={{ color: '#1e293b', fontWeight: '600' }}>{parts.slice(1).join(':').trim()}</span>
+                                        </div>
+                                      );
+                                    }
+                                    return <div key={lidx} style={{ color: '#334155', fontStyle: 'italic', fontSize: '13px', whiteSpace: 'pre-wrap' }}>{li}</div>;
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p style={{ margin: 0, fontSize: '14px', color: '#334155', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{req.message}</p>
+                      )}
                     </div>
                   </div>
                 </div>

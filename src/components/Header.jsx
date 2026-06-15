@@ -1,19 +1,43 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { supabase } from '../config/supabase'
 
 function Header() {
   const [sticky, setSticky] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState(null)
+  const [logoSettings, setLogoSettings] = useState({
+    header_logo_text: 'Badr Belabbes',
+    header_logo_dark: '',
+    header_logo_white: ''
+  })
   const location = useLocation()
 
   useEffect(() => {
+    fetchLogoSettings()
     const onScroll = () => setSticky(window.scrollY > 150)
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const fetchLogoSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('key, value')
+        .in('key', ['header_logo_text', 'header_logo_dark', 'header_logo_white'])
+      if (error) throw error
+      if (data) {
+        const map = {}
+        data.forEach(item => { map[item.key] = item.value })
+        setLogoSettings(prev => ({ ...prev, ...map }))
+      }
+    } catch (err) {
+      console.error('Error fetching logo settings in header:', err)
+    }
+  }
 
   useEffect(() => {
     document.body.classList.toggle('sidemenu-active', sidebarOpen)
@@ -35,8 +59,19 @@ function Header() {
             <div className="col-lg-12">
               <div className="header-content">
                 <div className="logo">
-                  <Link to="/" className="logo-text">Badr Belabbes</Link>
-                </div>
+                   {logoSettings.header_logo_dark || logoSettings.header_logo_white ? (
+                     <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+                       {logoSettings.header_logo_dark && (
+                         <img className="logo-dark" src={logoSettings.header_logo_dark} alt={logoSettings.header_logo_text} style={{ maxHeight: '40px', objectFit: 'contain' }} />
+                       )}
+                       {logoSettings.header_logo_white && (
+                         <img className="logo-white" src={logoSettings.header_logo_white} alt={logoSettings.header_logo_text} style={{ maxHeight: '40px', objectFit: 'contain' }} />
+                       )}
+                     </Link>
+                   ) : (
+                     <Link to="/" className="logo-text">{logoSettings.header_logo_text || 'Badr Belabbes'}</Link>
+                   )}
+                 </div>
                 <nav className="tmp-mainmenu-nav d-none d-xl-block">
                   <ul className="tmp-mainmenu">
                     <li>
@@ -60,8 +95,14 @@ function Header() {
                     <li>
                       <Link to="/projets" className={isActive('/projets')}>Projets</Link>
                     </li>
-                    <li>
-                      <Link to="/contact" className={isActive('/contact')}>Contact</Link>
+                    <li style={{ display: 'flex', alignItems: 'center', marginLeft: '15px' }}>
+                      <Link to="/devis" className="tmp-btn hover-icon-reverse radius-round" style={{ padding: '0px 28px', height: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
+                        <span className="icon-reverse-wrapper">
+                          <span className="btn-text" style={{ fontSize: '13px', textTransform: 'none', fontWeight: '600', color: '#ffffff' }}>Demander un devis</span>
+                          <span className="btn-icon" style={{ fontSize: '10px', color: '#ffffff' }}><i className="fa-sharp fa-regular fa-arrow-right"></i></span>
+                          <span className="btn-icon" style={{ fontSize: '10px', color: '#ffffff' }}><i className="fa-sharp fa-regular fa-arrow-right"></i></span>
+                        </span>
+                      </Link>
                     </li>
                   </ul>
                 </nav>
@@ -100,8 +141,14 @@ function Header() {
           <div className="inner">
             <div className="top-area">
               <Link to="/" className="logo">
-                <img className="logo-dark" src="/assets/images/logo/white-logo-reeni.png" alt="Belabbes Badr - Portfolio" />
-                <img className="logo-white" src="/assets/images/logo/logo-white.png" alt="Belabbes Badr - Portfolio" />
+                {logoSettings.header_logo_dark || logoSettings.header_logo_white ? (
+                  <>
+                    <img className="logo-dark" src={logoSettings.header_logo_dark || "/assets/images/logo/white-logo-reeni.png"} alt={logoSettings.header_logo_text} />
+                    <img className="logo-white" src={logoSettings.header_logo_white || "/assets/images/logo/logo-white.png"} alt={logoSettings.header_logo_text} />
+                  </>
+                ) : (
+                  <span className="logo-text">{logoSettings.header_logo_text || 'Badr Belabbes'}</span>
+                )}
               </Link>
               <div className="close-icon-area">
                 <button className="tmp-round-action-btn close_side_menu_active" onClick={() => setSidebarOpen(false)}>
@@ -168,8 +215,14 @@ function Header() {
             <div className="header-top">
               <div className="logo">
                 <Link to="/" className="logo-area">
-                  <img className="logo-dark" src="/assets/images/logo/white-logo-reeni.png" alt="Belabbes Badr - Portfolio" />
-                  <img className="logo-white" src="/assets/images/logo/logo-white.png" alt="Belabbes Badr - Portfolio" />
+                  {logoSettings.header_logo_dark || logoSettings.header_logo_white ? (
+                    <>
+                      <img className="logo-dark" src={logoSettings.header_logo_dark || "/assets/images/logo/white-logo-reeni.png"} alt={logoSettings.header_logo_text} />
+                      <img className="logo-white" src={logoSettings.header_logo_white || "/assets/images/logo/logo-white.png"} alt={logoSettings.header_logo_text} />
+                    </>
+                  ) : (
+                    <span className="logo-text">{logoSettings.header_logo_text || 'Badr Belabbes'}</span>
+                  )}
                 </Link>
               </div>
               <div className="close-menu">
@@ -202,7 +255,7 @@ function Header() {
                 <Link to="/projets" className={isActive('/projets')} onClick={() => setMobileMenuOpen(false)}>Projets</Link>
               </li>
               <li>
-                <Link to="/contact" className={isActive('/contact')} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+                <Link to="/devis" className={isActive('/devis')} onClick={() => setMobileMenuOpen(false)}>Demander un devis</Link>
               </li>
             </ul>
 

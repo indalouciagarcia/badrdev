@@ -28,6 +28,7 @@ import DashboardQuotes from './pages/dashboard/DashboardQuotes.jsx'
 import DashboardTechLogos from './pages/dashboard/DashboardTechLogos.jsx'
 import DashboardSettings from './pages/dashboard/DashboardSettings.jsx'
 import DashboardCRM from './pages/dashboard/DashboardCRM.jsx'
+import DashboardTemplates from './pages/dashboard/DashboardTemplates.jsx'
 
 function App() {
   return (
@@ -71,6 +72,7 @@ function App() {
         
         <Route path="/dashboard/quotes" element={<DashboardQuotes />} />
         <Route path="/dashboard/crm" element={<DashboardCRM />} />
+        <Route path="/dashboard/templates" element={<DashboardTemplates />} />
         <Route path="/dashboard/tech-logos" element={<DashboardTechLogos />} />
         <Route path="/dashboard/settings" element={<DashboardSettings />} />
       </Route>

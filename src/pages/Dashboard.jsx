@@ -210,8 +210,8 @@ export default function Dashboard() {
               <p style={{ fontSize: '13px', color: '#64748b', margin: '0.2rem 0 0' }}>Historique comparatif des messages et demandes de devis.</p>
             </div>
           </div>
-          <div style={{ flex: 1, width: '100%', minHeight: '260px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ flex: 1, width: '100%' }}>
+            <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={quotesChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorDevis" x1="0" y1="0" x2="0" y2="1">
@@ -248,7 +248,7 @@ export default function Dashboard() {
           <div style={{ flex: 1, width: '100%', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             {projectTypesData.length > 0 ? (
               <div style={{ height: '200px', position: 'relative' }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       data={projectTypesData}

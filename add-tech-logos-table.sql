@@ -22,5 +22,4 @@ INSERT INTO tech_logos (name, image_url, sort_order) VALUES
   ('Technologie 5', '/assets/images/our-supported-company/company-logo-5.svg', 5),
   ('Technologie 6', '/assets/images/our-supported-company/company-logo-6.svg', 6),
   ('Technologie 7', '/assets/images/our-supported-company/company-logo-7.svg', 7),
-  ('Technologie 8', '/assets/images/our-supported-company/company-logo-8.svg', 8)
-WHERE NOT EXISTS (SELECT 1 FROM tech_logos LIMIT 1);
+  ('Technologie 8', '/assets/images/our-supported-company/company-logo-8.svg', 8);

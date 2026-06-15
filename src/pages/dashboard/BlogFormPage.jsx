@@ -83,10 +83,14 @@ export default function BlogFormPage() {
         .eq('post_id', id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Silencieux si la table de commentaires facultative n'existe pas encore
+        if (error.code === '42P01') return;
+        throw error;
+      }
       setComments(data || []);
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.warn('Comments table optionally missing or offline:', error.message);
     }
   };
 
@@ -114,23 +118,59 @@ export default function BlogFormPage() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `blog_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+      const filePath = fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from('portfolio')
+      let activeBucket = 'blog';
+      let uploadRes = await supabase.storage
+        .from('blog')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadRes.error) {
+        activeBucket = 'profile';
+        uploadRes = await supabase.storage
+          .from('profile')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'portfolio';
+        uploadRes = await supabase.storage
+          .from('portfolio')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'uploads';
+        uploadRes = await supabase.storage
+          .from('uploads')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'projet';
+        uploadRes = await supabase.storage
+          .from('projet')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'project';
+        uploadRes = await supabase.storage
+          .from('project')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) throw uploadRes.error;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('portfolio')
+        .from(activeBucket)
         .getPublicUrl(filePath);
 
       setPostForm(prev => ({ ...prev, image_url: publicUrl }));
       alert('Image de couverture téléchargée avec succès !');
     } catch (error) {
       console.error('Error uploading blog image:', error);
-      alert('Erreur lors du téléchargement de l\'image : ' + error.message);
+      alert('Erreur lors du téléchargement de l\'image (vérifiez que le bucket "portfolio" ou "uploads" est créé sur Supabase) : ' + error.message);
     } finally {
       setUploadingImage(false);
     }

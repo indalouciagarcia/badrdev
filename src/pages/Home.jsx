@@ -17,6 +17,12 @@ function Home() {
   const [counters, setCounters] = useState([])
   const [experiences, setExperiences] = useState([])
   const [testimonials, setTestimonials] = useState([])
+  const [servicesSettings, setServicesSettings] = useState({
+    services_subtitle: 'Derniers Services',
+    services_title: 'Des Solutions Digitales Sur Mesure',
+    services_desc: 'Je conçois et développe des applications web et mobiles innovantes, évolutives et sécurisées pour les entreprises, startups et organisations sportives.',
+    services_image: ''
+  })
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -29,7 +35,8 @@ function Home() {
           countRes,
           expRes,
           testRes,
-          logosRes
+          logosRes,
+          settingsRes
         ] = await Promise.all([
           supabase.from('profile').select('*').limit(1).maybeSingle(),
           supabase.from('projects').select('*').order('created_at', { ascending: false }).limit(4),
@@ -38,7 +45,8 @@ function Home() {
           supabase.from('counters').select('*').order('created_at', { ascending: true }),
           supabase.from('experiences').select('*').order('created_at', { ascending: true }),
           supabase.from('testimonials').select('*').order('created_at', { ascending: false }),
-          supabase.from('tech_logos').select('*').eq('is_active', true).order('sort_order', { ascending: true })
+          supabase.from('tech_logos').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
+          supabase.from('site_settings').select('key, value').in('key', ['services_subtitle', 'services_title', 'services_desc', 'services_image'])
         ])
 
         if (profRes.data) setProfile(profRes.data)
@@ -49,6 +57,11 @@ function Home() {
         if (expRes.data) setExperiences(expRes.data)
         if (testRes.data) setTestimonials(testRes.data)
         if (logosRes.data && logosRes.data.length > 0) setTechLogos(logosRes.data)
+        if (settingsRes.data) {
+          const map = {}
+          settingsRes.data.forEach(item => { map[item.key] = item.value })
+          setServicesSettings(prev => ({ ...prev, ...map }))
+        }
       } catch (error) {
         console.error('Error fetching home data:', error)
       }
@@ -213,25 +226,23 @@ function Home() {
         <div className="container">
           <div className="section-head mb--50">
             <div className="section-sub-title center-title tmp-scroll-trigger tmp-fade-in animation-order-1">
-              <span className="subtitle">Derniers Services</span>
+              <span className="subtitle">{servicesSettings.services_subtitle}</span>
             </div>
-            <h2 className="title split-collab tmp-scroll-trigger tmp-fade-in animation-order-2">Des Solutions Digitales
-              <br /> Sur Mesure
-            </h2>
-            <p className="description section-sm tmp-scroll-trigger tmp-fade-in animation-order-3">Je conçois et développe des applications web et mobiles innovantes, évolutives et sécurisées pour les entreprises, startups et organisations sportives.</p>
+            <h2 className="title split-collab tmp-scroll-trigger tmp-fade-in animation-order-2" dangerouslySetInnerHTML={{ __html: servicesSettings.services_title.replace('\n', '<br/>').replace('\r', '') }} />
+            <p className="description section-sm tmp-scroll-trigger tmp-fade-in animation-order-3">{servicesSettings.services_desc}</p>
           </div>
           <div className="row">
             <div className="col-lg-6">
               {serviceCards.slice(0, 3).map((item, index) => (
                 <div className={`service-card-v2 tmponhover tmp-scroll-trigger tmp-fade-in animation-order-${index + 1}`} key={item.id}>
                   <h2 className="service-card-num"><span>0{index + 1}.</span>{item.title}</h2>
-                  <p className="service-para">{item.description}</p>
+                  <p className="service-para">{item.subtitle || item.description}</p>
                 </div>
               ))}
             </div>
             <div className="col-lg-6">
               <div className="service-card-user-image">
-                <img className="tmp-scroll-trigger tmp-zoom-in animation-order-1" src={profile?.photo_url || "/assets/images/services/latest-services-user-image-two-white.png"} alt="latest-user-image" style={{ objectFit: 'cover' }} />
+                <img className="tmp-scroll-trigger tmp-zoom-in animation-order-1" src={servicesSettings.services_image || profile?.photo_url || "/assets/images/services/latest-services-user-image-two-white.png"} alt="latest-user-image" style={{ objectFit: 'cover' }} />
               </div>
             </div>
           </div>

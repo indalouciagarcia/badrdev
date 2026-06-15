@@ -1,8 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { supabase } from '../config/supabase'
 
 function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [logoSettings, setLogoSettings] = useState({
+    footer_logo: '',
+    header_logo_text: 'Badr Belabbes'
+  })
+
+  useEffect(() => {
+    fetchLogoSettings()
+  }, [])
+
+  const fetchLogoSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('key, value')
+        .in('key', ['footer_logo', 'header_logo_text'])
+      if (error) throw error
+      if (data) {
+        const map = {}
+        data.forEach(item => { map[item.key] = item.value })
+        setLogoSettings(prev => ({ ...prev, ...map }))
+      }
+    } catch (err) {
+      console.error('Error fetching logo settings in footer:', err)
+    }
+  }
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault()
@@ -20,7 +46,13 @@ function Footer() {
                 <div className="single-footer-wrapper border-right mr--20">
                   <div className="logo">
                     <Link to="/">
-                      <img src="/assets/images/logo/logo-white.png" alt="Belabbes Badr - Portfolio" />
+                      {logoSettings.footer_logo ? (
+                        <img src={logoSettings.footer_logo} alt={logoSettings.header_logo_text} style={{ maxHeight: '45px', objectFit: 'contain' }} />
+                      ) : (
+                        <span className="logo-text" style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff' }}>
+                          {logoSettings.header_logo_text}
+                        </span>
+                      )}
                     </Link>
                   </div>
                   <p className="description"><span>Construisons</span> Ensemble le Digital</p>

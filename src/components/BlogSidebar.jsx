@@ -9,10 +9,29 @@ function BlogSidebar({ currentPostId = null }) {
   const [categories, setCategories] = useState([])
   const [loadingSearch, setLoadingSearch] = useState(false)
 
+  const [profile, setProfile] = useState(null)
+
   useEffect(() => {
     fetchRecentPosts()
     fetchCategories()
+    fetchProfile()
   }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profile')
+        .select('*')
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      if (data) {
+        setProfile(data)
+      }
+    } catch (err) {
+      console.error('Error fetching profile in sidebar:', err)
+    }
+  }
 
   const fetchRecentPosts = async () => {
     try {
@@ -167,21 +186,29 @@ function BlogSidebar({ currentPostId = null }) {
           <div className="about-me-details">
             <div className="about-me-details-head">
               <div className="about-me-img">
-                <img src="/assets/images/blog/about-me-user-img.png" alt="Badr Belabbes" />
+                <img 
+                  src={profile?.photo_url || "/assets/images/blog/about-me-user-img.png"} 
+                  alt={profile?.name || "Badr Belabbes"} 
+                  style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-primary)' }}
+                />
               </div>
               <div className="about-me-right-content">
-                <h3 className="title">Badr Belabbes</h3>
-                <p className="para">Développeur Full Stack</p>
+                <h3 className="title">{profile?.name || "Badr Belabbes"}</h3>
+                <p className="para">{profile?.title || "Développeur Full Stack"}</p>
                 <div className="social-link">
                   <a href="https://instagram.com" target="_blank" rel="noreferrer"><i className="fa-brands fa-instagram"></i></a>
-                  <a href="https://linkedin.com/in/badrbelabbes" target="_blank" rel="noreferrer"><i className="fa-brands fa-linkedin-in"></i></a>
+                  {profile?.linkedin_url && (
+                    <a href={profile.linkedin_url} target="_blank" rel="noreferrer"><i className="fa-brands fa-linkedin-in"></i></a>
+                  )}
                   <a href="https://twitter.com" target="_blank" rel="noreferrer"><i className="fa-brands fa-twitter"></i></a>
-                  <a href="https://github.com" target="_blank" rel="noreferrer"><i className="fa-brands fa-github"></i></a>
+                  {profile?.github_url && (
+                    <a href={profile.github_url} target="_blank" rel="noreferrer"><i className="fa-brands fa-github"></i></a>
+                  )}
                 </div>
               </div>
             </div>
             <p className="about-me-para">
-              Développeur Full Stack passionné avec 13+ ans d'expérience. Je partage mes connaissances sur React, Node.js et le développement web moderne.
+              {profile?.description || "Développeur Full Stack passionné avec 13+ ans d'expérience. Je partage mes connaissances sur React, Node.js et le développement web moderne."}
             </p>
           </div>
         </div>

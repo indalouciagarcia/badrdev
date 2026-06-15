@@ -43,6 +43,7 @@ export default function DashboardLayout() {
     { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
     { path: '/dashboard/quotes', label: 'Devis & Contacts', icon: Mail },
     { path: '/dashboard/crm', label: 'Suivi CRM', icon: Users },
+    { path: '/dashboard/templates', label: 'Templates & Devis', icon: FolderKanban },
     { path: '/dashboard/tech-logos', label: 'Logos Technos', icon: FolderKanban },
     { path: '/dashboard/settings', label: 'Paramètres & GA', icon: LayoutDashboard },
   ];

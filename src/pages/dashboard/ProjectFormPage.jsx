@@ -75,16 +75,45 @@ export default function ProjectFormPage() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `project_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+      const filePath = fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from('portfolio')
+      let activeBucket = 'projet';
+      let uploadRes = await supabase.storage
+        .from('projet')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadRes.error) {
+        activeBucket = 'project';
+        uploadRes = await supabase.storage
+          .from('project')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'profile';
+        uploadRes = await supabase.storage
+          .from('profile')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'portfolio';
+        uploadRes = await supabase.storage
+          .from('portfolio')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'uploads';
+        uploadRes = await supabase.storage
+          .from('uploads')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) throw uploadRes.error;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('portfolio')
+        .from(activeBucket)
         .getPublicUrl(filePath);
 
       setProjectForm(prev => ({ ...prev, image_url: publicUrl }));

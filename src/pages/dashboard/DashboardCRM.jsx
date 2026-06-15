@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../config/supabase';
+import { Link } from 'react-router-dom';
 import { 
   Users, Mail, Phone, Calendar, ArrowRight, CheckCircle2, 
   Clock, AlertCircle, Plus, Trash2, Edit2, Search, 
@@ -381,7 +382,22 @@ export default function DashboardCRM() {
 
               {/* Project Specs */}
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '13px', color: '#166534', textTransform: 'uppercase', fontWeight: '700' }}>Besoin estimé</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '1px solid #bbf7d0', paddingBottom: '0.4rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '13px', color: '#166534', textTransform: 'uppercase', fontWeight: '700' }}>Besoin estimé</h4>
+                  <Link 
+                    to="/dashboard/templates" 
+                    state={{
+                      client_name: selectedLead.name,
+                      client_email: selectedLead.email,
+                      client_company: selectedLead.company_name || selectedLead.client_type === 'entreprise' ? 'Entreprise' : '',
+                      title: selectedLead.project_type || 'Prestation sur-mesure',
+                      lead_id: selectedLead.id
+                    }}
+                    style={{ fontSize: '11px', fontWeight: 'bold', textDecoration: 'none', color: 'white', background: '#FF014F', padding: '0.3rem 0.6rem', borderRadius: '6px' }}
+                  >
+                    🚀 Créer Devis
+                  </Link>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '13px', color: '#14532d' }}>
                   <div><strong>Catégorie :</strong> {selectedLead.project_type || 'Standard'}</div>
                   <div><strong>Délai :</strong> {selectedLead.timeline || 'Non spécifié'}</div>

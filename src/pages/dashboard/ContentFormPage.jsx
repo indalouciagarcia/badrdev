@@ -50,12 +50,52 @@ export default function ContentFormPage() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${type}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+      const filePath = fileName;
+      let activeBucket = 'portfolio';
+      let uploadRes = await supabase.storage
+        .from('portfolio')
+        .upload(filePath, file);
 
-      const { error: uploadError } = await supabase.storage.from('portfolio').upload(filePath, file);
-      if (uploadError) throw uploadError;
+      if (uploadRes.error) {
+        activeBucket = 'uploads';
+        uploadRes = await supabase.storage
+          .from('uploads')
+          .upload(filePath, file);
+      }
 
-      const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(filePath);
+      if (uploadRes.error) {
+        activeBucket = 'profile';
+        uploadRes = await supabase.storage
+          .from('profile')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'blog';
+        uploadRes = await supabase.storage
+          .from('blog')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'projet';
+        uploadRes = await supabase.storage
+          .from('projet')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'project';
+        uploadRes = await supabase.storage
+          .from('project')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) throw uploadRes.error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(activeBucket)
+        .getPublicUrl(filePath);
 
       if (type === 'testimonials') {
         setTestimonialData(prev => ({ ...prev, image_url: publicUrl }));

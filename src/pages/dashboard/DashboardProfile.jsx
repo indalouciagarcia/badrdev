@@ -50,16 +50,53 @@ export default function DashboardProfile() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `profile_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+      // Utiliser le nom du fichier directement pour éviter les sous-dossiers inutiles
+      const filePath = fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from('portfolio')
+      let activeBucket = 'profile';
+      let uploadRes = await supabase.storage
+        .from('profile')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadRes.error) {
+        activeBucket = 'blog';
+        uploadRes = await supabase.storage
+          .from('blog')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'projet';
+        uploadRes = await supabase.storage
+          .from('projet')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'project';
+        uploadRes = await supabase.storage
+          .from('project')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'portfolio';
+        uploadRes = await supabase.storage
+          .from('portfolio')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) {
+        activeBucket = 'uploads';
+        uploadRes = await supabase.storage
+          .from('uploads')
+          .upload(filePath, file);
+      }
+
+      if (uploadRes.error) throw uploadRes.error;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('portfolio')
+        .from(activeBucket)
         .getPublicUrl(filePath);
 
       setProfile(prev => ({ ...prev, photo_url: publicUrl }));

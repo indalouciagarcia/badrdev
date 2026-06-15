@@ -59,13 +59,10 @@ function Contact() {
                   <div className="col-lg-5">
                     <div className="section-head text-align-left">
                       <div className="section-sub-title tmp-scroll-trigger tmp-fade-in animation-order-1">
-                        <span className="subtitle">GET IN TOUCH</span>
+                        <span className="subtitle">CONTACTEZ-MOI</span>
                       </div>
-                      <h2 className="title split-collab tmp-scroll-trigger tmp-fade-in animation-order-2">Elevate your brand with Me </h2>
-                      <p className="description tmp-scroll-trigger tmp-fade-in animation-order-3">ished fact that a reader will be
-                        distrol acted bioiiy desig
-                        ished fact that a reader will acted ished fact that a reader will be distrol
-                        acted </p>
+                      <h2 className="title split-collab tmp-scroll-trigger tmp-fade-in animation-order-2">Construisons Votre Prochain Produit Digital Ensemble</h2>
+                      <p className="description tmp-scroll-trigger tmp-fade-in animation-order-3">Disponible pour des projets freelance, du consulting, des collaborations long terme et des partenariats de développement logiciel. Parlons de votre projet !</p>
                     </div>
                   </div>
                   <div className="col-lg-7">
