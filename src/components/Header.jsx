@@ -143,7 +143,7 @@ function Header() {
               <Link to="/" className="logo">
                 {logoSettings.header_logo_dark || logoSettings.header_logo_white ? (
                   <>
-                    <img className="logo-dark" src={logoSettings.header_logo_dark || "/assets/images/logo/white-logo-reeni.png"} alt={logoSettings.header_logo_text} />
+                    <img className="logo-dark" src={logoSettings.header_logo_dark || "/assets/images/logo/logo-pink.svg"} alt={logoSettings.header_logo_text} />
                     <img className="logo-white" src={logoSettings.header_logo_white || "/assets/images/logo/logo-white.png"} alt={logoSettings.header_logo_text} />
                   </>
                 ) : (
@@ -217,7 +217,7 @@ function Header() {
                 <Link to="/" className="logo-area">
                   {logoSettings.header_logo_dark || logoSettings.header_logo_white ? (
                     <>
-                      <img className="logo-dark" src={logoSettings.header_logo_dark || "/assets/images/logo/white-logo-reeni.png"} alt={logoSettings.header_logo_text} />
+                      <img className="logo-dark" src={logoSettings.header_logo_dark || "/assets/images/logo/logo-pink.svg"} alt={logoSettings.header_logo_text} />
                       <img className="logo-white" src={logoSettings.header_logo_white || "/assets/images/logo/logo-white.png"} alt={logoSettings.header_logo_text} />
                     </>
                   ) : (

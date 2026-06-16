@@ -199,7 +199,11 @@ function BlogDetails() {
     try {
       const [postRes, commentsRes] = await Promise.all([
         supabase.from('blog_posts').select('*, blog_categories(name)').eq('id', id).single(),
-        supabase.from('blog_comments').select('*').eq('post_id', id).order('created_at', { ascending: false })
+        supabase.from('blog_comments')
+          .select('*')
+          .eq('post_id', id)
+          .eq('status', 'diffused')
+          .order('created_at', { ascending: false })
       ])
       if (postRes.error) throw postRes.error
       setPost(postRes.data)
@@ -214,7 +218,10 @@ function BlogDetails() {
   const fetchCommentsOnly = async () => {
     try {
       const { data } = await supabase
-        .from('blog_comments').select('*').eq('post_id', id)
+        .from('blog_comments')
+        .select('*')
+        .eq('post_id', id)
+        .eq('status', 'diffused')
         .order('created_at', { ascending: false })
       setComments(data || [])
     } catch (err) { console.error(err) }
@@ -227,14 +234,54 @@ function BlogDetails() {
     e.preventDefault()
     setSubmittingComment(true)
     try {
+      // 1. Vérifier si l'utilisateur est abonné
+      let { data: sub, error: subError } = await supabase
+        .from('blog_subscribers')
+        .select('*')
+        .eq('email', commentForm.email.trim().toLowerCase())
+        .maybeSingle()
+
+      if (subError) throw subError;
+
+      // 2. Si l'utilisateur est blacklisted, bloquer le commentaire
+      if (sub && sub.is_blacklisted) {
+        alert("Votre adresse e-mail a été bannie de l'espace commentaire par l'administrateur.");
+        setSubmittingComment(false);
+        return;
+      }
+
+      // 3. S'il n'est pas abonné, l'inscrire automatiquement pour lui permettre de commenter
+      if (!sub) {
+        const confirmSub = window.confirm("Pour pouvoir laisser un commentaire, vous devez vous abonner à notre newsletter. Souhaitez-vous vous abonner et publier votre commentaire ?");
+        if (!confirmSub) {
+          setSubmittingComment(false);
+          return;
+        }
+        
+        const { data: newSub, error: createSubError } = await supabase
+          .from('blog_subscribers')
+          .insert([{ email: commentForm.email.trim().toLowerCase(), name: commentForm.name }])
+          .select()
+          .single()
+
+        if (createSubError) throw createSubError;
+        sub = newSub;
+      }
+
+      // 4. Insérer le commentaire avec le statut 'pending' pour modération admin
       const { error } = await supabase.from('blog_comments').insert([{
-        post_id: id, name: commentForm.name,
-        email: commentForm.email, message: commentForm.message
+        post_id: id, 
+        name: commentForm.name,
+        email: commentForm.email.trim().toLowerCase(), 
+        message: commentForm.message,
+        subscriber_id: sub.id,
+        status: 'pending' // En attente de diffusion par l'administrateur
       }])
+
       if (error) throw error
       setCommentForm({ name: '', email: '', message: '' })
       await fetchCommentsOnly()
-      alert('Votre commentaire a été publié avec succès !')
+      alert('Votre commentaire a été soumis avec succès ! Il sera affiché dès qu\'il sera validé par l\'administrateur.');
     } catch (error) {
       alert('Erreur : ' + error.message)
     } finally {
@@ -372,14 +419,32 @@ function BlogDetails() {
                     comments.map((comment, index) => (
                       <div className="single-comment-audience" key={comment.id}
                         style={{ display: 'flex', gap: '1rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9', marginBottom: '1rem' }}>
-                        <div className="author-image">
-                          <img src={`/assets/images/blog/comments-img-${(index % 2) + 1}.png`} alt="Avatar"
-                            style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <div className="author-image" style={{ display: 'flex', alignItems: 'center' }}>
+                          <div style={{
+                            width: '50px',
+                            height: '50px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #FF014F 0%, #ff527b 100%)',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            fontSize: '18px',
+                            boxShadow: '0 4px 10px rgba(255, 1, 79, 0.2)'
+                          }}>
+                            {comment.name ? comment.name.charAt(0).toUpperCase() : 'U'}
+                          </div>
                         </div>
                         <div className="right-area-commnet" style={{ flex: 1 }}>
                           <div className="top-area-comment" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <div className="left">
-                              <h6 className="title" style={{ fontSize: '17px', margin: 0, fontWeight: '700' }}>{comment.name}</h6>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <h6 className="title" style={{ fontSize: '17px', margin: 0, fontWeight: '700' }}>{comment.name}</h6>
+                                <span style={{ background: 'rgba(255, 1, 79, 0.1)', color: '#FF014F', padding: '2px 8px', borderRadius: '50px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                  Abonné
+                                </span>
+                              </div>
                               <span style={{ fontSize: '13px', color: '#64748b' }}>
                                 {formatDate(comment.created_at)}
                               </span>

@@ -212,15 +212,20 @@ export default function ProjectFormPage() {
 
               <div>
                 <label className="meta-label">Catégorie</label>
-                <input
-                  type="text"
-                  placeholder="Catégorie (ex: Technologies Sportives)"
+                <select
                   value={projectForm.category}
                   onChange={(e) => setProjectForm({...projectForm, category: e.target.value})}
                   required
                   disabled={submitting}
-                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.75rem 1rem', border: '1px solid #cbd5e1', borderRadius: '10px', fontSize: '18px' }}
-                />
+                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.75rem 1rem', border: '1px solid #cbd5e1', borderRadius: '10px', fontSize: '18px', background: 'white' }}
+                >
+                  <option value="Branding">Branding</option>
+                  <option value="Design">Design</option>
+                  <option value="Content writing">Content writing</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Développement Web">Développement Web</option>
+                  <option value="Autre">Autre</option>
+                </select>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../config/supabase';
-import { BookOpen, Plus, Trash2, Loader2, Edit3, FileText, Tag } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Loader2, Edit3, FileText, Tag, MessageSquare, Users, Ban, ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import '../Dashboard.css';
 
@@ -8,6 +8,8 @@ export default function DashboardBlog() {
   const [activeTab, setActiveTab] = useState('posts');
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // State for new category
@@ -21,20 +23,66 @@ export default function DashboardBlog() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [postsRes, categoriesRes] = await Promise.all([
+      const [postsRes, categoriesRes, commentsRes, subscribersRes] = await Promise.all([
         supabase.from('blog_posts').select('*, blog_categories(name)').order('created_at', { ascending: false }),
-        supabase.from('blog_categories').select('*').order('name', { ascending: true })
+        supabase.from('blog_categories').select('*').order('name', { ascending: true }),
+        supabase.from('blog_comments').select('*, blog_posts(title)').order('created_at', { ascending: false }),
+        supabase.from('blog_subscribers').select('*').order('created_at', { ascending: false })
       ]);
 
       if (postsRes.error) throw postsRes.error;
       if (categoriesRes.error) throw categoriesRes.error;
+      if (commentsRes.error) throw commentsRes.error;
+      if (subscribersRes.error) throw subscribersRes.error;
 
       setPosts(postsRes.data || []);
       setCategories(categoriesRes.data || []);
+      setComments(commentsRes.data || []);
+      setSubscribers(subscribersRes.data || []);
     } catch (error) {
       console.error('Error fetching blog data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateCommentStatus = async (id, status) => {
+    try {
+      const { error } = await supabase
+        .from('blog_comments')
+        .update({ status })
+        .eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de la modération du commentaire.');
+    }
+  };
+
+  const handleDeleteComment = async (id) => {
+    if (!confirm('Supprimer ce commentaire définitivement ?')) return;
+    try {
+      const { error } = await supabase.from('blog_comments').delete().eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de la suppression.');
+    }
+  };
+
+  const handleToggleBlacklist = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('blog_subscribers')
+        .update({ is_blacklisted: !currentStatus })
+        .eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de la modification de la liste noire.');
     }
   };
 
@@ -155,6 +203,20 @@ export default function DashboardBlog() {
           <Tag size={18} />
           Catégories
         </button>
+        <button 
+          onClick={() => setActiveTab('comments')}
+          style={{ padding: '0.75rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'comments' ? '2px solid var(--indigo-primary)' : '2px solid transparent', color: activeTab === 'comments' ? 'var(--indigo-primary)' : '#64748b', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <MessageSquare size={18} />
+          Commentaires ({comments.filter(c => c.status === 'pending').length} en attente)
+        </button>
+        <button 
+          onClick={() => setActiveTab('subscribers')}
+          style={{ padding: '0.75rem 1rem', background: 'none', border: 'none', borderBottom: activeTab === 'subscribers' ? '2px solid var(--indigo-primary)' : '2px solid transparent', color: activeTab === 'subscribers' ? 'var(--indigo-primary)' : '#64748b', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <Users size={18} />
+          Abonnés & Blacklist
+        </button>
       </div>
 
       {activeTab === 'posts' && (
@@ -263,6 +325,100 @@ export default function DashboardBlog() {
             )}
           </div>
           
+        </div>
+      )}
+
+      {activeTab === 'comments' && (
+        <div className="detail-card" style={{ padding: '2rem' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '18px', fontWeight: '700' }}>Modération des commentaires</h3>
+          {comments.length === 0 ? (
+            <p style={{ color: '#64748b' }}>Aucun commentaire à modérer.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {comments.map(c => (
+                <div key={c.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <strong style={{ fontSize: '15px', color: '#0f172a' }}>{c.name}</strong>
+                      <span style={{ fontSize: '13px', color: '#64748b', marginLeft: '0.5rem' }}>({c.email})</span>
+                      <p style={{ margin: '0.1rem 0 0', fontSize: '11px', color: '#8b5cf6' }}>
+                        Article : {c.blog_posts?.title || 'Chargement...'}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {c.status === 'pending' ? (
+                        <button 
+                          onClick={() => handleUpdateCommentStatus(c.id, 'diffused')}
+                          className="btn-primary" 
+                          style={{ background: '#10b981', color: 'white', padding: '0.35rem 0.75rem', fontSize: '12px', display: 'flex', gap: '0.25rem', alignItems: 'center', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                          <CheckCircle size={14} /> Diffuser
+                        </button>
+                      ) : (
+                        <span style={{ background: '#d1fae5', color: '#065f46', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                          Diffusé
+                        </span>
+                      )}
+                      <button 
+                        onClick={() => handleDeleteComment(c.id)}
+                        className="btn-danger"
+                        style={{ padding: '0.35rem', borderRadius: '6px' }}
+                        title="Supprimer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#475569', background: 'white', padding: '0.75rem', borderRadius: '8px', border: '1px solid #f1f5f9', fontStyle: 'italic' }}>
+                    "{c.message}"
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'subscribers' && (
+        <div className="detail-card" style={{ padding: '2rem' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '18px', fontWeight: '700' }}>Gestionnaires des Utilisateurs (Abonnés & Blacklist)</h3>
+          {subscribers.length === 0 ? (
+            <p style={{ color: '#64748b' }}>Aucun utilisateur abonné.</p>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+              {subscribers.map(sub => (
+                <div key={sub.id} style={{ background: sub.is_blacklisted ? '#fee2e2' : '#f8fafc', border: `1px solid ${sub.is_blacklisted ? '#fca5a5' : '#e2e8f0'}`, borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifycontent: 'space-between', gap: '0.75rem' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{sub.name}</h4>
+                    <span style={{ fontSize: '13px', color: '#64748b' }}>{sub.email}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '0.5rem' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: sub.is_blacklisted ? '#ef4444' : '#10b981' }}>
+                      {sub.is_blacklisted ? '🔴 Banni' : '🟢 Actif'}
+                    </span>
+                    <button 
+                      onClick={() => handleToggleBlacklist(sub.id, sub.is_blacklisted)}
+                      style={{ 
+                        background: sub.is_blacklisted ? '#10b981' : '#ef4444', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '6px', 
+                        padding: '0.35rem 0.75rem', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
+                    >
+                      <Ban size={13} /> {sub.is_blacklisted ? 'Débloquer' : 'Bannir (Blacklist)'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

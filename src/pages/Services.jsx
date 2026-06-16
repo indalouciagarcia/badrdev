@@ -74,7 +74,7 @@ function Services() {
                   <div className="contact-inner">
                     <div className="contact-form">
                       <div id="form-messages" className="error"></div>
-                      <form className="tmp-dynamic-form" id="contact-form" method="POST" action="https://inversweb.com/product/html/reeni/mailer.php" onSubmit={handleContactSubmit}>
+                      <form className="tmp-dynamic-form" id="contact-form" onSubmit={handleContactSubmit}>
                         <div className="contact-form-wrapper row">
                           <div className="col-lg-6">
                             <div className="form-group">

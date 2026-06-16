@@ -19,7 +19,7 @@ export default function WhatsAppButton() {
         onMouseLeave={() => setHovered(false)}
         style={{
           position: 'fixed',
-          bottom: '2rem',
+          bottom: '8rem',
           right: '2rem',
           zIndex: 9997,
           display: 'flex',
@@ -71,7 +71,7 @@ export default function WhatsAppButton() {
         }
         .wa-pulse-ring {
           position: fixed;
-          bottom: 2rem;
+          bottom: 8rem;
           right: 2rem;
           width: 58px;
           height: 58px;

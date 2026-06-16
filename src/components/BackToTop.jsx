@@ -26,9 +26,9 @@ function BackToTop() {
   }
 
   return (
-    <div className="scrollToTop" style={{ display: visible ? 'block' : 'none' }} onClick={scrollToTop}>
+    <div className={`scrollToTop${visible ? ' active-progress' : ''}`} onClick={scrollToTop} style={{ bottom: '2rem', right: '2rem' }}>
       <div className="arrowUp">
-        <i className="fa-light fa-arrow-up"></i>
+        <i className="fa-solid fa-arrow-up"></i>
       </div>
       <div className="water" style={{ transform: `translate(0px, ${waterPercent}%)` }}>
         <svg viewBox="0 0 560 20" className="water_wave water_wave_back">

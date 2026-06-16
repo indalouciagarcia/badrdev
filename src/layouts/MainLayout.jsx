@@ -5,7 +5,6 @@ import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import BackToTop from '../components/BackToTop.jsx'
 import ChatPopup from '../components/ChatPopup.jsx'
-import DemoModal from '../components/DemoModal.jsx'
 import FloatingQuoteButton from '../components/FloatingQuoteButton.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
 
@@ -86,13 +85,6 @@ function MainLayout() {
       <ChatPopup />
       <FloatingQuoteButton />
       <WhatsAppButton />
-      {/* <div class="tmp-right-demo">
-      <button class="demo-button">
-          <p class="mb--0">48</p>
-          <span class="text">Demos</span>
-      </button>
-      </div> */}
-      <DemoModal />
     </>
   )
 }
